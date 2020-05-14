@@ -1,3 +1,5 @@
+from initialising
+
 def matbal_run2(dict_tank, df_prod, dict_pvtmaster, df_pvt_oil, df_pvt_gas, regress, regress_config=None):
     #####Material Balance
     data_dict = {
@@ -20,7 +22,7 @@ def matbal_run2(dict_tank, df_prod, dict_pvtmaster, df_pvt_oil, df_pvt_gas, regr
     WDI = [None] * len(df_prod['np'])
     CDI = [None] * len(df_prod['np'])
     if regress == False:
-        Pres_calc, ts_obs, reservoir_pressure_obs, ts = eval_mbal_input2(data_dict)
+        Pres_calc, ts_obs, reservoir_pressure_obs, ts = initialising.eval_mbal_input2(data_dict)
     else:
 
         popt, sd = mbal_fit(data_dict)
@@ -28,7 +30,7 @@ def matbal_run2(dict_tank, df_prod, dict_pvtmaster, df_pvt_oil, df_pvt_gas, regr
         dict_tank['wei'][0] = popt[1]
         dict_tank['J'][0] = popt[2]
         data_dict['dict_tank'] = dict_tank
-        Pres_calc, ts_obs, reservoir_pressure_obs, ts = eval_mbal_input2(data_dict)
+        Pres_calc, ts_obs, reservoir_pressure_obs, ts = initialising.eval_mbal_input2(data_dict)
 
     data_dict['Pres_calc'] = Pres_calc
     DDI, SDI, WDI, CDI = drive_indices(data_dict)
