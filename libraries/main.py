@@ -1,4 +1,13 @@
-import initialising
+#import libraries.initialising as init
+import libraries.iterations as itera
+import libraries.matbal as mb
+import plotly
+import json
+import pandas as pd
+import numpy as np
+from scipy.optimize import curve_fit
+
+
 
 def matbal_run2(dict_tank, df_prod, dict_pvtmaster, df_pvt_oil, df_pvt_gas, regress, regress_config=None):
     #####Material Balance
@@ -10,33 +19,27 @@ def matbal_run2(dict_tank, df_prod, dict_pvtmaster, df_pvt_oil, df_pvt_gas, regr
         'dict_tank': dict_tank
     }
 
-
-    #Pres_calc = eval_mbal_input2(N, Wei, Np, Wp, Gp, Pi, We, aquifer_pres, Pres_calc_empty, pvt_oil_pressure,
-    #                             pvt_oil_Bo, pvt_oil_Bg, pvt_oil_Rs, Rsb,
-    #                             Bti, Bgi, m, Boi, cw, Swi, cf, Rsi, Bw, Winj, Bwinj, Ginj, J, ts, DDI, SDI, WDI, CDI)
-
     df_prod = data_dict['df_prod']
-    #Pres_calc, ts_obs, reservoir_pressure_obs, ts = eval_mbal_input2(data_dict)
+    # Pres_calc, ts_obs, reservoir_pressure_obs, ts = eval_mbal_input2(data_dict)
     DDI = [None] * len(df_prod['np'])
     SDI = [None] * len(df_prod['np'])
     WDI = [None] * len(df_prod['np'])
     CDI = [None] * len(df_prod['np'])
-    if regress == False:
-        Pres_calc, ts_obs, reservoir_pressure_obs, ts = initialising.eval_mbal_input2(data_dict)
+    if regress is False:
+        Pres_calc, ts_obs, reservoir_pressure_obs, ts = itera.eval_mbal_input2(data_dict)
     else:
-
         popt, sd = mbal_fit(data_dict)
         dict_tank['initial_inplace'][0] = popt[0]
         dict_tank['wei'][0] = popt[1]
         dict_tank['J'][0] = popt[2]
         data_dict['dict_tank'] = dict_tank
-        Pres_calc, ts_obs, reservoir_pressure_obs, ts = initialising.eval_mbal_input2(data_dict)
+        Pres_calc, ts_obs, reservoir_pressure_obs, ts = itera.eval_mbal_input2(data_dict)
 
     data_dict['Pres_calc'] = Pres_calc
     DDI, SDI, WDI, CDI = drive_indices(data_dict)
     # plot = match_plot(ts, Pres_calc, ts_obs, reservoir_pressure_obs)
     return ts, Pres_calc, ts_obs, reservoir_pressure_obs, DDI, SDI, WDI, CDI, \
-           dict_tank['initial_inplace'], dict_tank['wei'], dict_tank['J']
+        dict_tank['initial_inplace'], dict_tank['wei'], dict_tank['J']
 
 
 def match_plot(ts, Pres_calc, ts_obs, reservoir_pressure_obs):
@@ -99,15 +102,15 @@ def drive_indices(dict):
     Pres_calc = dict['Pres_calc']
     reservoir_pressure_obs = reservoir_pressure_obs[reservoir_pressure_obs.notnull()]
     reservoir_pressure_obs = reservoir_pressure_obs * 1.0
-    N = float(dict_tank['initial_inplace'][0])
-    Wei = float(dict_tank['wei'][0])
-    Swi = float(dict_tank['swi'][0])
-    cw = float(dict_tank['cw'][0])
-    cf = float(dict_tank['cf'][0])
+    N = float(dict_tank['initial_inplace'])
+    Wei = float(dict_tank['wei'])
+    Swi = float(dict_tank['swi'])
+    cw = float(dict_tank['cw'])
+    cf = float(dict_tank['cf'])
     # N = 1.00E+07
     # Wei = 5.00E+07
-    J = float(dict_tank['J'][0])
-    m = float(dict_tank['initial_gascap'][0])
+    J = float(dict_tank['J'])
+    m = float(dict_tank['initial_gascap'])
     # We = 0
     Winj = df_prod['wi']
     Winj = Winj.fillna(0)
@@ -120,14 +123,13 @@ def drive_indices(dict):
     # Psc = 15.025  # psia
     # Tres = 219  # F
     # Pbp = df_pvtmaster['sat_press']  # psia
-    Rsi = dict_pvtmaster.gor  # scf/stb
+    Rsi = dict_pvtmaster['gor']  # scf/stb
 
-
-    Pi = float(dict_tank['initial_pressure'][0])
+    Pi = float(dict_tank['initial_pressure'])
     Boi = np.interp(Pi, df_pvt_oil['pressure'], df_pvt_oil['oil_fvf'])
     Bgi = np.interp(Pi, df_pvt_gas['pressure'], df_pvt_gas['gas_fvf']) / 1000
-    Rsb = dict_pvtmaster.gor
-    Bti = formation_total_volume_factor(Boi, Bgi, Rsb, Rsi)
+    Rsb = dict_pvtmaster['gor']
+    Bti = mb.formation_total_volume_factor(Boi, Bgi, Rsb, Rsi)
     #####Water PVT
     Bw = 1.0  # dict_tank['Bw']
     Bwinj = 1.0
@@ -152,7 +154,6 @@ def drive_indices(dict):
     WDI = [None] * len(Np)
     CDI = [None] * len(Np)
 
-
     for x in range(len(Np)):
         if x == 0:
             DDI[x] = 0
@@ -166,19 +167,19 @@ def drive_indices(dict):
             Bg = np.interp(P, pvt_oil_pressure, pvt_oil_Bg)
             Bginj = Bg
             Rs = np.interp(P, pvt_oil_pressure, pvt_oil_Rs)
-            Bt = formation_total_volume_factor(Bo, Bg, Rsb, Rs)
-            Eo = dissolved_oil_and_gas_expansion(Bt, Bti)
-            Eg2 = gas_cap_expansion2(Bti, Bg, Bgi)
-            Eg = gas_cap_expansion(Bti, Bg, Bgi)
+            Bt = mb.formation_total_volume_factor(Bo, Bg, Rsb, Rs)
+            Eo = mb.dissolved_oil_and_gas_expansion(Bt, Bti)
+            Eg2 = mb.gas_cap_expansion2(Bti, Bg, Bgi)
+            Eg = mb.gas_cap_expansion(Bti, Bg, Bgi)
             dP = Pi - P
-            Efw = pore_volume_reduction_connate_water_expansion(m, Boi, cw, Swi, cf, dP)
+            Efw = mb.pore_volume_reduction_connate_water_expansion(m, Boi, cw, Swi, cf, dP)
             F, produced_oil_and_gas, produced_water, injected_gas, injected_water = \
-                production_injection_balance(Np[x],Bt, Rs, Rsi, Bg, Wp[x], Bw, Winj[x], Bwinj, Ginj[x], Bginj, Gp[x])
-            Wex, aq_pres = aquifer_influx(x, P, Wei, We, ts, Pres_calc, Pi, J, aquifer_pres)
+                mb.production_injection_balance(Np[x],Bt, Rs, Rsi, Bg, Wp[x], Bw, Winj[x], Bwinj, Ginj[x], Bginj, Gp[x])
+            Wex, aq_pres = itera.aquifer_influx(x, P, Wei, We, ts, Pres_calc, Pi, J, aquifer_pres)
             We[x] = Wex
             aquifer_pres[x] = aq_pres
 
-            Ncalc = oil_in_place(F, Eo, m, Eg, Efw, We[x], Bw, Bti)
+            Ncalc = mb.oil_in_place(F, Eo, m, Eg, Efw, We[x], Bw, Bti)
             DDI[x] = Ncalc * Eo / F
             SDI[x] = Ncalc * m * Eg2 * (Boi / Bgi) / F
             WDI[x] = (We[x] * Bw - Wp[x] * Bw) / F
@@ -198,7 +199,7 @@ def mbal_fit(dict):
         dict_tank['wei'][0] = Wei
         dict_tank['J'][0] = J
         dict['dict_tank'] = dict_tank
-        Pres_calc2, ts_obs, reservoir_pressure_obs, ts = eval_mbal_input2(dict)
+        Pres_calc2, ts_obs, reservoir_pressure_obs, ts = mb.eval_mbal_input2(dict)
         Pres_calc_obs = []
         ts_obs_vals = ts_obs.values
         for x in range(len(ts_obs_vals)):
@@ -215,3 +216,43 @@ def mbal_fit(dict):
     popt, pcov = curve_fit(fit_mbal_input, ts_obs, reservoir_pressure_obs, bounds=([1E6, 0.00001, 0.0001], [1E9, 10E9, 10.0]))
     sd = np.sqrt(np.diag(pcov))
     return popt, sd
+
+
+
+
+# def mbal_run_simulation():
+#     regress = False
+#     regress_config = None
+#     instance_tank = dict(request.POST.lists())
+#     prod_fk = instance_tank['production_fk'][0]
+#     pvt_fk = instance_tank['pvt_fk'][0]
+#     # aqu_fk = instance_tank['aquifer_fk']
+#
+#     instance_prod = ProductionDataSet_MatBal.objects.filter(definition_fk=prod_fk)
+#     instance_pvt_o = Pvt_table_oil.objects.filter(definition_table=pvt_fk)
+#     instance_pvt_g = Pvt_Table_Gas.objects.filter(definition_table=pvt_fk)
+#     instance_pvt_master = PvtMaster.objects.get(pk=pvt_fk)
+#     # instance_aquifer = AquiferMaster.objects.get(pk=aqu_fk)
+#
+#     df_prod = pd.DataFrame(read_frame(instance_prod))
+#     df_pvt_o = pd.DataFrame(read_frame(instance_pvt_o))
+#     df_pvt_g = pd.DataFrame(read_frame(instance_pvt_g))
+#     # df_tank_master = pd.DataFrame(read_frame(instance_tank))
+#     # df_pvt_master = pd.DataFrame(read_frame(instance_pvt_master))
+#     regress_config = {}
+#     list_regress = ['initial_inplace_regress', 'aquifer_size_regress', 'aquifer_pi_regress']
+#     for var in list_regress:
+#         try:
+#             regress_config[var] = instance_tank[var][0]
+#             regress = True
+#         except:
+#             pass
+#
+#     #regress = True
+#     ts, Pres_calc, ts_obs, reservoir_pressure_obs, DDI, SDI, WDI, CDI, N, Wei, J = mbal2.matbal_run2(instance_tank, df_prod,
+#                             instance_pvt_master, df_pvt_o, df_pvt_g, regress, regress_config)
+#
+#     return ts, Pres_calc, ts_obs, reservoir_pressure_obs, DDI, SDI, WDI, CDI, N, Wei, J
+#
+# if __name__ == 'main':
+#     mbal_run_simulation()
