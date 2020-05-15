@@ -1,3 +1,7 @@
+# insert directory where libraries exits
+import sys
+sys.path.insert(1,'./')
+
 import libraries.main as main
 import pandas as pd
 import os
@@ -10,7 +14,8 @@ regress = False
 regress_config = None
 
 path = os.path.dirname(__name__)
-file = os.path.join(path, '../data/lsu_matbal/OilMBEx.xls')
+#file = os.path.join(path, '../data/lsu_matbal/OilMBEx.xls')
+file = os.path.join(path, './data/lsu_matbal/OilMBEx.xls') # Linux single dot(.)
 
 keep_cols = ['Days', 'Np\nSTBO', 'Gp\nMCF', 'Wp\nSTBW', 'Meas P\npsia']
 df_prod = pd.read_excel(file, sheet_name='Calculations', skiprows=12)
