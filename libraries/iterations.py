@@ -2,6 +2,7 @@ import libraries.matbal as mb
 import numpy as np
 from scipy.optimize import fsolve
 import pandas as pd
+from scipy import interpolate
 
 
 def obj_funtion2(P, *data):
@@ -108,7 +109,7 @@ def aquifer_pressure(step, Wei, We, aquifer_pres, Pi):
     return aq_pres
 
 
-def eval_mbal_input2(dict):
+def eval_mbal_input(dict):
     df_prod = dict['df_prod']
     dict_tank = dict['dict_tank']
     dict_pvtmaster = dict['dict_pvtmaster']
@@ -116,7 +117,7 @@ def eval_mbal_input2(dict):
     df_pvt_oil = dict['df_pvt_oil']
 
     dates = df_prod['datestamp']
-    ts = pd.to_numeric(dates - df_prod['datestamp'].min()) / 864e11
+    ts = pd.to_numeric(dates - dates.min()) / 864e11
     Np = df_prod['np']
     Gp = df_prod['gp']
     # Gp = Gp * 1000.0
@@ -174,8 +175,16 @@ def eval_mbal_input2(dict):
 
 
     Pi = float(dict_tank['initial_pressure'])
-    Boi = np.interp(Pi, df_pvt_oil['pressure'], df_pvt_oil['oil_fvf'])
-    Bgi = np.interp(Pi, df_pvt_gas['pressure'], df_pvt_gas['gas_fvf']) / 1000
+    #f_interpol = interpolate.interp1d(df_pvt_oil['pressure'], df_pvt_oil['oil_fvf'],
+    #                                  bounds_error=False, fill_value="extrapolate")
+    #Boi = np.interp(Pi, df_pvt_oil['pressure'], df_pvt_oil['oil_fvf'])
+    #Bgi = np.interp(Pi, df_pvt_gas['pressure'], df_pvt_gas['gas_fvf']) / 1000
+    #Boi = f_interpol(Pi)
+    #f_interpol = interpolate.interp1d(df_pvt_oil['pressure'], df_pvt_gas['gas_fvf'],
+    #                                  bounds_error=False, fill_value="extrapolate")
+    #Bgi = f_interpol(Pi)
+    Boi = dict_tank['Boi']
+    Bgi = dict_tank['Bgi']
     Rsb = dict_pvtmaster['gor']
     Bti = mb.formation_total_volume_factor(Boi, Bgi, Rsb, Rsi)
     #####Water PVT
