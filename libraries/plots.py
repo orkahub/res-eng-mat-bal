@@ -1,5 +1,7 @@
 import plotly.graph_objs as go
 from plotly.offline import plot
+import plotly
+import json
 
 
 def plot_pressure_match(ts, Pres_calc, ts_obs, reservoir_pressure_obs):
@@ -44,9 +46,10 @@ def plot_pressure_match(ts, Pres_calc, ts_obs, reservoir_pressure_obs):
               'displayModeBar': False}
 
     fig = go.Figure(data=data, layout=layout)
+    graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
     #plot_div = plot(fig, output_type='div', include_plotlyjs=False, config=config)
 
-    return fig
+    return data
 
 
 text_layout = dict(autosize=True,
@@ -137,6 +140,7 @@ def plot_drive_indices(ts, DDI, SDI, WDI, CDI):
               'displayModeBar': False}
 
     fig = go.Figure(data=data, layout=layout)
+    graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
     #plot_div = plot(fig, output_type='div', include_plotlyjs=False, config=config)
 
-    return fig
+    return data

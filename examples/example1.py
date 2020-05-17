@@ -1,7 +1,7 @@
 # insert directory where libraries exits
 import sys
 sys.path.insert(1,'./')
-
+import plotly.graph_objs as go
 import libraries.main as main
 import pandas as pd
 import os
@@ -9,16 +9,13 @@ import datetime
 import libraries.plots as plots
 from plotly.subplots import make_subplots
 from plotly.offline import plot
-import webbrowser
 
 
 regress = False
 regress_config = None
 
 path = os.path.dirname(__name__)
-#file = os.path.join(path, '../data/lsu_matbal/OilMBEx.xls')
-file = os.path.join(path, './data/lsu_matbal/OilMBEx.xls') # Linux single dot(.)
-
+file = os.path.join(path, '../data/lsu_matbal/OilMBEx.xls')
 keep_cols = ['Days', 'Np\nSTBO', 'Gp\nMCF', 'Wp\nSTBW', 'Meas P\npsia']
 df_prod = pd.read_excel(file, sheet_name='Calculations', skiprows=12, nrows=73)
 df_prod.rename(columns={'Np\nSTBO': 'np', 'Gp\nMCF': 'gp', 'Wp\nSTBW': 'wp', 'Meas P\npsia': 'pressure'}, inplace=True)
@@ -54,18 +51,14 @@ pvt_master = {
 ts, Pres_calc, ts_obs, reservoir_pressure_obs, DDI, SDI, WDI, CDI, N, Wei, J = main.matbal_run(tank, df_prod,
                         pvt_master, df_pvt_o, df_pvt_g, regress, regress_config)
 
-
-# Dashboard
-html_graphs=open("dashboard_ex1.html", 'w')
-html_graphs.write("<html><head></head><body>"+"\n")
 plot1 = plots.plot_pressure_match(ts, Pres_calc, ts_obs, reservoir_pressure_obs)
-plot(plot1, filename='plot1.html', auto_open=False)
-html_graphs.write("  <object data=\""+'plot1.html'+"\" width=\"650\" height=\"500\"></object>"+"\n")
+plot1 = go.Figure(data=plot1)
+plot1.show()
+
 plot2 = plots.plot_drive_indices(ts, DDI, SDI, WDI, CDI)
-plot(plot2, filename='plot2.html', auto_open=False)
-html_graphs.write("  <object data=\""+'plot2.html'+"\" width=\"650\" height=\"500\"></object>"+"\n")
-html_graphs.write("</body></html>")
-print('Open exported html dashboard')
+plot2 = go.Figure(data=plot2)
+plot(plot2)
+
 
 
 
