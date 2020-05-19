@@ -2,13 +2,17 @@
 " Some of these functions were taken from
 https://github.com/ESSS/kraken-macros/blob/master/src/macros/mbal/mbalcore/mbal_functions.py
 """
+import sys
 import json
 import numpy as np
 import pandas as pd
 import plotly
 from scipy.optimize import curve_fit
 import math
+from termcolor import colored
 
+class raisedError(Exception):
+    """an exception class"""
 
 class Mbal_resutls:
     def __init__(self, Pres_calc, We, aq_press):
@@ -97,6 +101,8 @@ def formation_volume_factor_gas_from_z(z, Tres, Psc, P, Tsc):
 
 
 def production_injection_balance(Np, Bt, Rs, Rsi, Bg, Wp, Bw, Winj, Bwinj, Ginj, Bginj, Gp):
+    if Np == 0:
+        raise raisedError(colored('ZeroDivision: Np cannot be zero', 'red'))
     produced_oil_and_gas = (Np * (Bt + (Gp / Np - Rsi) * Bg))
     produced_water = Wp * Bw
     injected_water = Winj * Bwinj
@@ -121,7 +127,7 @@ def dissolved_oil_and_gas_expansion2(Bo, Boi, Rsi, Bg, Rs):
 
 def gas_cap_expansion(Bti, Bg, Bgi):
     Eg = ((Bg / Bgi) - 1)
-
+    
     return Eg
 
 
