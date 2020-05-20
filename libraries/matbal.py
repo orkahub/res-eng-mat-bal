@@ -101,8 +101,30 @@ def formation_volume_factor_gas_from_z(z, Tres, Psc, P, Tsc):
 
 
 def production_injection_balance(Np, Bt, Rs, Rsi, Bg, Wp, Bw, Winj, Bwinj, Ginj, Bginj, Gp):
-    if Np == 0:
+    # create dictionary with input values
+    input_dict = {
+                "Np": Np,
+                "Bt": Bt,
+                "Rs": Rs,
+                "Rsi": Rsi,
+                "Bg": Bg,
+                "WP": Wp,
+                "Bw": Bw,
+                "Winj": Winj,
+                "Bwinj": Bwinj,
+                "Ginj": Ginj,
+                "Bginj": Bginj,
+                "Gp": Gp
+            }
+    # prevent zero division
+    if input_dict["Np"] == 0:
         raise raisedError(colored('ZeroDivision: Np cannot be zero', 'red'))
+    # flag negative input values
+    for keys, values in input_dict.items():
+            if values < 0:
+                print(colored(f'{keys} = {values}', 'green'))
+                raise raisedError(colored(f'{keys} < 0', 'red'))
+    # Calculate
     produced_oil_and_gas = (Np * (Bt + (Gp / Np - Rsi) * Bg))
     produced_water = Wp * Bw
     injected_water = Winj * Bwinj
