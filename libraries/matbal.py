@@ -101,6 +101,7 @@ def formation_volume_factor_gas_from_z(z, Tres, Psc, P, Tsc):
 
 
 def production_injection_balance(Np, Bt, Rs, Rsi, Bg, Wp, Bw, Winj, Bwinj, Ginj, Bginj, Gp):
+
     # create dictionary with input values
     input_dict = {
                 "Np": Np,
@@ -116,20 +117,22 @@ def production_injection_balance(Np, Bt, Rs, Rsi, Bg, Wp, Bw, Winj, Bwinj, Ginj,
                 "Bginj": Bginj,
                 "Gp": Gp
             }
+
     # prevent zero division
     if input_dict["Np"] == 0:
         raise raisedError(colored('ZeroDivision: Np cannot be zero', 'red'))
+    
     # flag negative input values
     for keys, values in input_dict.items():
             if values < 0:
                 print(colored(f'{keys} = {values}', 'green'))
                 raise raisedError(colored(f'{keys} < 0', 'red'))
+    
     # Calculate
     produced_oil_and_gas = (Np * (Bt + (Gp / Np - Rsi) * Bg))
     produced_water = Wp * Bw
     injected_water = Winj * Bwinj
     injected_gas = Ginj * Bginj
-
     F = (produced_oil_and_gas + produced_water - injected_water - injected_gas)
 
     return F, produced_oil_and_gas, produced_water, injected_gas, injected_water
@@ -148,6 +151,12 @@ def dissolved_oil_and_gas_expansion2(Bo, Boi, Rsi, Bg, Rs):
 
 
 def gas_cap_expansion(Bti, Bg, Bgi):
+    
+    # Check Bgi NOT zero
+    if Bgi == 0:
+        raise raisedError(colored("ZeroDivision: Bgi cannot be zero", "red"))
+   
+    # Calculate gas cap expansion
     Eg = ((Bg / Bgi) - 1)
     
     return Eg
@@ -166,6 +175,12 @@ def deltaP(Pi, Pavg):
 
 
 def pore_volume_reduction_connate_water_expansion(m, Boi, cw, Swi, cf, deltaP):
+    
+    # Handle parameters that result in zeroDivision
+    if Swi == 1.0 or deltaP == 0:
+        raise raisedError(colored("ZeroDivisionError: Check Swi != 1 and/or deltaP  != 0", "red"))
+
+    # Calculate Efw
     Efw = ((cw * Swi + cf) / (1.0 - Swi)) * deltaP
 
     return Efw
