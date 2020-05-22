@@ -6,24 +6,12 @@ import pytest
 import numpy as np
 import pandas as pd
 
-# Formation_total_volume factor START:
-def test_formation_total_volume_factor_higher():
-    Bo, Bg, Rsb, Rs = 1.735, 0.6508, 1720, 1720
-    fvft = mb.formation_total_volume_factor(Bo, Bg, Rsb, Rs)
-    assert fvft == Bo
 
-def test_formation_total_volume_factor_lower():
-    Bo, Bg, Rsb, Rs = 1.735, 0.6508, 1720, 1720
-    test_val = Bo + Bg * (Rsb - Rs)
-    fvft = mb.formation_total_volume_factor(Bo, Bg, Rsb, Rs)
-    assert fvft == test_val
-# Formation_total_volume factor END:
 
 #------------------------------------------------------
 #--------------production injection balance START:
 #------------------------------------------------------
 
-#------TEST DIV by ZERO------#
 def test_production_injection_balance_zero_div():
     """ Test to see if Np is zero""" 
     
@@ -47,11 +35,8 @@ def test_production_injection_balance_zero_div():
                                                                                  Bt, Rs, Rsi, Bg, Wp, Bw, 
                                                                                  Winj, Bwinj, Ginj, Bginj, Gp)
 
-#------RESOLVED------#
-
-#------TEST NEGATIVE VALUES------#
 def test_production_injection_balance_negatives():
-   """Test for negative reservoir volume inputs""" 
+    """Test for negative reservoir volume inputs""" 
 
     # Arrange
     Np = 4000
@@ -74,24 +59,43 @@ def test_production_injection_balance_negatives():
                                                                                  Bt, Rs, Rsi, Bg, Wp, Bw, 
                                                                                  Winj, Bwinj, Ginj, Bginj, Gp)
 
-#------RESOLVED------#
-
-#    assert produced_oil_and_gas >= 0
-#    assert produced_water >= 0
-#    assert injected_water >= 0
-#    assert injected_gas >= 0 
-#    assert produced_oil_and_gas == 4456.8
-
 #------------------------------------------------------
-#--------------Production injection balance END:
+#--------------gas_cap_expansion START:
 #------------------------------------------------------
 
 
-#------------------------------------------------------
-#--------------New Func START:
-#------------------------------------------------------
+def test_gas_cap_expansion_zeroDiv():
+    """Test for negative division"""
+    # Arrange
+    Bti = None
+    Bg = 1.2
+    Bgi = 0
+    
+    # Assert act
+    with pytest.raises(raisedError) as context:
+        Eg = mb.gas_cap_expansion(Bti, Bg, Bgi)
 
 
+
 #------------------------------------------------------
-#--------------New Func END:
+#--pore_volume_reduction_connate_water_expansion START:
 #------------------------------------------------------
+def test_pore_volume_reduction_connate_water_expansion_ZeroDiv():
+    """Check that Swi != 1.0 && deltaP != 0"""
+
+    # Arrange
+    m = 1
+    Boi = 1
+    cw = 1
+    Swi = 1
+    cf = 1
+    deltaP = 0
+
+    # Act
+    with pytest.raises(raisedError) as context:
+        Efw = mb.pore_volume_reduction_connate_water_expansion(m, Boi, cw, Swi, cf, deltaP)
+    
+
+
+
+
