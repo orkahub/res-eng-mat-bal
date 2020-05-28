@@ -9,6 +9,7 @@ import datetime
 import libraries.plots as plots
 from plotly.subplots import make_subplots
 from plotly.offline import plot
+from libraries.main2 import tank as tank_instance
 
 
 regress = False
@@ -48,14 +49,28 @@ pvt_master = {
     'temperature': 219,
 }
 
-ts, Pres_calc, ts_obs, reservoir_pressure_obs, DDI, SDI, WDI, CDI, N, Wei, J = main.matbal_run(tank, df_prod,
-                        pvt_master, df_pvt_o, df_pvt_g, regress, regress_config)
+tank1 = tank_instance()
+tank1.tank_data = tank
+tank1.prod_table = df_prod
+tank1.oil_pvt_table = df_pvt_o
+tank1.gas_pvt_table = df_pvt_g
+tank1.pvt_master = pvt_master
+tank1.regress = False
+tank1.regress_config = None
+ts_res, tank_results = tank1.matbal_run()
 
-plot1 = plots.plot_pressure_match(ts, Pres_calc, ts_obs, reservoir_pressure_obs)
+
+#ts, Pres_calc, ts_obs, reservoir_pressure_obs, DDI, SDI, WDI, CDI, N, Wei, J = main.matbal_run(tank, df_prod,
+#                        pvt_master, df_pvt_o, df_pvt_g, regress, regress_config)
+
+#plot1 = plots.plot_pressure_match(ts, Pres_calc, ts_obs, reservoir_pressure_obs)
+plot1 = plots.plot_pressure_match(ts_res['Time'], ts_res['Calculated Pressure'], df_prod['Days'], df_prod['pressure'])
 plot1 = go.Figure(data=plot1)
 plot1.show()
 
-plot2 = plots.plot_drive_indices(ts, DDI, SDI, WDI, CDI)
+#plot2 = plots.plot_drive_indices(ts, DDI, SDI, WDI, CDI)
+plot2 = plots.plot_drive_indices(ts_res['Time'], ts_res['Depletion Drive Index'], ts_res['Segregation Drive Index'],
+                                 ts_res['Water Drive Index'], ts_res['Compaction Drive Index'])
 plot2 = go.Figure(data=plot2)
 plot(plot2)
 

@@ -10,11 +10,11 @@ from scipy.optimize import curve_fit
 import math
 
 
-class Mbal_resutls:
-    def __init__(self, Pres_calc, We, aq_press):
-        self.Pres_calc = Pres_calc
-        self.We = We
-        self.aq_press = aq_press
+# class Mbal_resutls:
+#     def __init__(self, Pres_calc, We, aq_press):
+#         self.Pres_calc = Pres_calc
+#         self.We = We
+#         self.aq_press = aq_press
 
 
 def VEH_td(VEH_aq_type, k, t, poro, visc, ct, rr, La):
@@ -163,3 +163,4 @@ def oil_in_place_water_influx(F, We, Eo):
     oil_in_place_water_influx = (F - We) / Eo
 
     return oil_in_place_water_influx
+

@@ -59,11 +59,17 @@ def test_calculated_pressure_at_different_timesteps():
                                                                                                    pvt_master, df_pvt_o,
                                                                                                    df_pvt_g, regress,
                                                                                                    regress_config)
-
-    #mismatch_array = df_prod['P\npsia'] - Pres_calc
+    sum_indeces = np.array(DDI) + np.array(SDI) + np.array(WDI) + np.array(CDI)
+    ones_array = np.repeat(1.0, len(DDI))
 
     # Verify
-    assert_array_almost_equal(df_prod['P\npsia'][1:4], Pres_calc[1:4], 0)
+
+    #assert_array_almost_equal(df_prod['P\npsia'][1:10], Pres_calc[1:10], 0)
+    assert_array_almost_equal(sum_indeces[50:70], ones_array[50:70], 3)
     assert_array_almost_equal(df_prod['P\npsia'][30:40], Pres_calc[30:40], 0)
 
     # Cleanup - none
+
+
+def test_if_plots_are_ploted():
+    pass
