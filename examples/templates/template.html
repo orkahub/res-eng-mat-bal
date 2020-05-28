@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en"><link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+                      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+                      crossorigin="anonymous">
+
+<head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <meta charset="UTF-8">
+    <div id="input_control">
+        <title>Material Balance Plot</title>
+        <label>Oil in Place </label>
+        <input id="N" value=" {{ N|int }}"><br>
+        <label>Aquifer size</label>
+        <input id="Wei" value=" {{ Wei|int }}"><br>
+        <label>Aquifer PI  </label>
+        <input id="PI" value=" {{ PI|int }}"><br>
+        <button onclick="Run()"> Run </button>
+    </div>
+
+    <div id="table" class="row">
+        <div class="col-6" id="chart1" class="chart">
+        </div>
+        <div class="col-6" id="chart2" class="chart">
+        </div>
+    </div>
+    <div class="row">
+        {% for table in tables %}
+            {{titles[loop.index]}}
+            {{ table|safe }}
+        {% endfor %}
+
+    </div>
+</head>
+<body onload="Plot()">
+
+</body>
+</html>
+
+<style>
+    #input_control {
+        padding: 30px 0px 20px 60px;
+    }
+    #table {
+        padding: 30px;
+    }
+</style>
+
+<script>
+
+function Plot(){
+    var plot1 = {{ plot1 | safe }};
+    Plotly.plot('chart1',plot1,{})
+    var plot2 = {{ plot2 | safe }};
+    Plotly.plot('chart2',plot2,{})
+}
+
+function Run() {
+    $.ajax({
+        url: "/recalc",
+        type: "GET",
+        contentType: 'application/json;charset=UTF-8',
+        data: {
+            N: document.getElementById('N').value,
+            Wei: document.getElementById('Wei').value,
+            PI: document.getElementById('PI').value
+        },
+        dataType:"json",
+        success: function(data) {
+            console.log(data)
+            Plotly.react('chart1', JSON.parse(data.plot1), {});
+            Plotly.react('chart2', JSON.parse(data.plot2), {});
+            //window.location.reload(true);
+        }
+    })
+}
+
+
+</script>
