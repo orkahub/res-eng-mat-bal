@@ -2,7 +2,6 @@
 import sys
 sys.path.insert(1,'./')
 
-import libraries.main as main
 import pandas as pd
 import os
 import datetime
@@ -11,7 +10,7 @@ from flask import Flask, render_template, request
 from plotly.offline import plot
 import json
 import plotly
-from libraries.main2 import tank as tank_instance
+from libraries.main import tank as tank_instance
 
 
 regress = False

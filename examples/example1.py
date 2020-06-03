@@ -2,14 +2,13 @@
 import sys
 sys.path.insert(1,'./')
 import plotly.graph_objs as go
-import libraries.main as main
 import pandas as pd
 import os
 import datetime
 import libraries.plots as plots
 from plotly.subplots import make_subplots
 from plotly.offline import plot
-from libraries.main2 import tank as tank_instance
+from libraries.main import tank as tank_instance
 
 
 regress = False
