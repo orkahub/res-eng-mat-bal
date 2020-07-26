@@ -8,7 +8,7 @@ setup(
   author = 'Orkahub Energy',
   author_email = 'orkahub@gmail.com',
   url = 'https://github.com/orkahub/res-eng-mat-bal',
-  #download_url = 'https://github.com/user/reponame/archive/v_01.tar.gz',    # I explain this later on
+  download_url = 'https://github.com/orkahub/res-eng-mat-bal/archive/v_01.tar.gz',
   keywords = ['RESERVOIR', 'ENERGY', 'OIL', 'GAS'],
   install_requires=[
           'pandas',
