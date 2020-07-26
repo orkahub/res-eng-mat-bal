@@ -15,7 +15,6 @@ setup(
           'numpy',
           'scipy',
           'plotly',
-          'json',
       ],
   classifiers=[
     'Development Status :: 3 - Alpha',
