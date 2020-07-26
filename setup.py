@@ -13,7 +13,9 @@ setup(
   install_requires=[
           'pandas',
           'numpy',
-          'scipy'
+          'scipy',
+          'plotly',
+          'json',
       ],
   classifiers=[
     'Development Status :: 3 - Alpha',
