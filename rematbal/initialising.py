@@ -1,7 +1,7 @@
 import numpy as np
-import libraries.matbal as mb
+import rematbal.matbal as mb
 import pandas as pd
-import libraries.iterations as itera
+import rematbal.iterations as itera
 
 
 def eval_mbal_input2(dict):

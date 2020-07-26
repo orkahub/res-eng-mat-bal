@@ -3,7 +3,7 @@ import numpy as np
 import os
 import pandas as pd
 import datetime
-import libraries.main as main
+import rematbal.main as main
 
 
 def test_calculated_pressure_at_different_timesteps():

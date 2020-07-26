@@ -1,4 +1,4 @@
-import libraries.matbal as mb
+import rematbal.matbal as mb
 import numpy as np
 from scipy.optimize import fsolve
 import pandas as pd

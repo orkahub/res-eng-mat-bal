@@ -5,10 +5,10 @@ import plotly.graph_objs as go
 import pandas as pd
 import os
 import datetime
-import libraries.plots as plots
+import rematbal.plots as plots
 from plotly.subplots import make_subplots
 from plotly.offline import plot
-from libraries.main import tank as tank_instance
+from rematbal.main import tank as tank_instance
 
 
 regress = False
