@@ -2,13 +2,13 @@ from distutils.core import setup
 setup(
   name = 'rematbal',
   packages = ['rematbal'],
-  version = '0.1',
+  version = '0.2',
   license='MIT',
   description = 'Reservoir Engineering Material Balance library',
   author = 'Orkahub Energy',
   author_email = 'orkahub@gmail.com',
   url = 'https://github.com/orkahub/res-eng-mat-bal',
-  download_url = 'https://github.com/orkahub/res-eng-mat-bal/archive/v_01.tar.gz',
+  download_url = 'https://github.com/orkahub/res-eng-mat-bal/archive/v_02.tar.gz',
   keywords = ['RESERVOIR', 'ENERGY', 'OIL', 'GAS'],
   install_requires=[
           'pandas',
