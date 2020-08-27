@@ -53,12 +53,13 @@ tank1.prod_table = df_prod
 tank1.oil_pvt_table = df_pvt_o
 tank1.gas_pvt_table = df_pvt_g
 tank1.pvt_master = pvt_master
-tank1.regress = False
+tank1.regress = True
 tank1.regress_config = None
 ts_res, tank_results = tank1.matbal_run()
+print(tank_results)
 
-print(ts_res)
 exit(0)
+
 
 #ts, Pres_calc, ts_obs, reservoir_pressure_obs, DDI, SDI, WDI, CDI, N, Wei, J = main.matbal_run(tank, df_prod,
 #                        pvt_master, df_pvt_o, df_pvt_g, regress, regress_config)

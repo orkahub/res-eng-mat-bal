@@ -3,7 +3,11 @@ import numpy as np
 import os
 import pandas as pd
 import datetime
-import rematbal.main as main
+from rematbal.main import tank as tank_instance
+#import rematbal.main as main
+#import sys, os
+#myPath = os.path.dirname(os.path.abspath(__file__))
+#sys.path.insert(0, myPath + '/../')
 
 
 def test_calculated_pressure_at_different_timesteps():
@@ -55,15 +59,30 @@ def test_calculated_pressure_at_different_timesteps():
 
     # Exercise
 
-    ts, Pres_calc, ts_obs, reservoir_pressure_obs, DDI, SDI, WDI, CDI, N, Wei, J = main.matbal_run(tank, df_prod,
-                                                                                                   pvt_master, df_pvt_o,
-                                                                                                   df_pvt_g, regress,
-                                                                                                   regress_config)
+    tank1 = tank_instance()
+    tank1.tank_data = tank
+    tank1.prod_table = df_prod
+    tank1.oil_pvt_table = df_pvt_o
+    tank1.gas_pvt_table = df_pvt_g
+    tank1.pvt_master = pvt_master
+    # tank1.regress = False
+    # tank1.regress_config = None
+    # ts_res, tank_results = tank1.matbal_run()
+
+    tank1.regress = True
+    tank1.regress_config = None
+    ts_res, tank_results = tank1.matbal_run()
+
+    DDI = ts_res['Depletion Drive Index']
+    SDI = ts_res['Segregation Drive Index']
+    WDI = ts_res['Water Drive Index']
+    CDI = ts_res['Compaction Drive Index']
     sum_indeces = np.array(DDI) + np.array(SDI) + np.array(WDI) + np.array(CDI)
     ones_array = np.repeat(1.0, len(DDI))
+    Pres_calc = ts_res['Calculated Pressure']
 
     # Verify
-
+    print(Pres_calc[1:10])
     #assert_array_almost_equal(df_prod['P\npsia'][1:10], Pres_calc[1:10], 0)
     assert_array_almost_equal(sum_indeces[50:70], ones_array[50:70], 3)
     assert_array_almost_equal(df_prod['P\npsia'][30:40], Pres_calc[30:40], 0)

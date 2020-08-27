@@ -9,6 +9,8 @@ import rematbal.plots as plots
 from plotly.subplots import make_subplots
 from plotly.offline import plot
 from rematbal.main import tank as tank_instance
+from scipy import stats
+import matplotlib.pyplot as plt
 
 
 regress = False
@@ -47,33 +49,43 @@ pvt_master = {
     'sat_press': 8227,
     'temperature': 219,
 }
+
+tank = {'initial_inplace': 5393487.759211203, 'initial_gascap': 0, 'initial_pressure': 10180, 'wei': 10999999999.9988,
+        'J': 0.4446624977502875, 'swi': 0.2, 'cw': 2.5e-06, 'cf': 3e-05, 'Boi': 1.735, 'Bgi': 0.6508,
+        'initial_inplace_sd': 141439.29428151343, 'wei_sd': 0.008334858350091836, 'J_sd': 0.012664217123234959}
+
 tank1 = tank_instance()
 tank1.tank_data = tank
 tank1.prod_table = df_prod
 tank1.oil_pvt_table = df_pvt_o
 tank1.gas_pvt_table = df_pvt_g
 tank1.pvt_master = pvt_master
+#tank1.regress = True
+#tank1.regress_config = None
+#ts_res, tank_results = tank1.matbal_run()
+#print(tank_results)
+
+
+
+sampling = 100
+binning = 20
+
+plt.figure(figsize=(15, 15))
+STOIIPs = stats.norm.rvs(size=sampling, loc=tank['initial_inplace'], scale=tank['initial_inplace_sd'])
+Weis = stats.norm.rvs(size=sampling, loc=tank['wei'], scale=tank['wei_sd'])
+Weis[Weis < 0] = 0
+Js = stats.norm.rvs(size=sampling, loc=tank['J'], scale=tank['J_sd'])
+
 tank1.regress = False
-tank1.regress_config = None
-ts_res, tank_results = tank1.matbal_run()
 
-print(ts_res)
-exit(0)
-
-#ts, Pres_calc, ts_obs, reservoir_pressure_obs, DDI, SDI, WDI, CDI, N, Wei, J = main.matbal_run(tank, df_prod,
-#                        pvt_master, df_pvt_o, df_pvt_g, regress, regress_config)
-
-#plot1 = plots.plot_pressure_match(ts, Pres_calc, ts_obs, reservoir_pressure_obs)
-plot1 = plots.plot_pressure_match(ts_res['Time'], ts_res['Calculated Pressure'], df_prod['Days'], df_prod['pressure'])
-plot1 = go.Figure(data=plot1)
-plot1.show()
-
-#plot2 = plots.plot_drive_indices(ts, DDI, SDI, WDI, CDI)
-plot2 = plots.plot_drive_indices(ts_res['Time'], ts_res['Depletion Drive Index'], ts_res['Segregation Drive Index'],
-                                 ts_res['Water Drive Index'], ts_res['Compaction Drive Index'])
-plot2 = go.Figure(data=plot2)
-plot(plot2)
-
+for x in range(sampling):
+    tank['initial_inplace'] = STOIIPs[x]
+    tank['wei'] = Weis[x]
+    tank['J'] = Js[x]
+    tank1.tank_data = tank
+    ts_res, tank_results = tank1.matbal_run()
+    plt.plot(ts_res['Time'], ts_res['Calculated Pressure'], '-')
+plt.show()
 
 
 

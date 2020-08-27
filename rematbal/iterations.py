@@ -3,10 +3,11 @@ import numpy as np
 from scipy.optimize import fsolve
 import pandas as pd
 
-def mbal_inner_calc(dict, P, Pres_calc, We, aquifer_pres, step):
-    Np, Wp, Gp, N, Wei, pvt_oil_pressure, pvt_oil_Bo, pvt_oil_Bg, pvt_oil_Rs, Rsb, \
-    Bti, Bgi, Pi, m, Boi, cw, Swi, cf, Rsi, Bw, Winj, Bwinj, Ginj, J, \
-    ts, VEH_aq_type, td_array, VEH_dp_array, r, rr, aq_type = mbal_setup(dict)
+def mbal_inner_calc(dict, P, Pres_calc, We, aquifer_pres, step, dates, Np, Wp, Gp, N, Wei, pvt_oil_pressure, pvt_oil_Bo,
+                    pvt_oil_Bg, pvt_oil_Rs, Rsb,
+                    Bti, Bgi, Pi, m, Boi, cw, Swi, cf, Rsi, Bw, Winj, Bwinj, Ginj, J,
+                    ts, VEH_aq_type, td_array, VEH_dp_array, r, rr, aq_type):
+
     Bo = np.interp(P, pvt_oil_pressure, pvt_oil_Bo)
     Bg = np.interp(P, pvt_oil_pressure, pvt_oil_Bg)
     Bginj = Bg
@@ -43,7 +44,46 @@ def obj_funtion2(P, *data):
     We = data[2]
     aq_pres = data[3]
     step = data[4]
-    F, Eo, m, Eg, Efw, We, aq_pres, Bw, Bti, N = mbal_inner_calc(dict, P, Pres_calc, We, aq_pres, step)
+    dates = data[5]
+    Np = data[6]
+    Wp = data[7]
+    Gp = data[8]
+    N = data[9]
+    Wei = data[10]
+    pvt_oil_pressure = data[11]
+    pvt_oil_Bo = data[12]
+    pvt_oil_Bg = data[13]
+    pvt_oil_Rs = data[14]
+    Rsb = data[15]
+    Bti = data[16]
+    Bgi = data[17]
+    Pi = data[18]
+    m = data[19]
+    Boi = data[20]
+    cw = data[21]
+    Swi = data[22]
+    cf = data[23]
+    Rsi = data[24]
+    Bw = data[25]
+    Winj = data[26]
+    Bwinj = data[27]
+    Ginj = data[28]
+    J = data[29]
+    ts = data[30]
+    VEH_aq_type = data[31]
+    td_array = data[32]
+    VEH_dp_array = data[33]
+    r = data[34]
+    rr = data[35]
+    aq_type = data[36]
+
+
+    #= mbal_setup(dict)
+    F, Eo, m, Eg, Efw, We, aq_pres, Bw, Bti, N = mbal_inner_calc('', P, Pres_calc, We, aq_pres, step, dates,
+                                                Np, Wp, Gp, N, Wei, pvt_oil_pressure, pvt_oil_Bo, \
+                                                pvt_oil_Bg, pvt_oil_Rs, Rsb, \
+                                                Bti, Bgi, Pi, m, Boi, cw, Swi, cf, Rsi, Bw, Winj, \
+                                                Bwinj, Ginj, J, ts, VEH_aq_type, td_array, VEH_dp_array, r, rr, aq_type)
     Wex = We[step]
     Ncalc = mb.oil_in_place(F, Eo, m, Eg, Efw, Wex, Bw, Bti)
     of = (N - Ncalc)
@@ -79,27 +119,30 @@ def aquifer_pressure(step, Wei, We, aquifer_pres, Pi):
 
 
 def mbal_setup(dict):
-    df_prod = dict['df_prod']
+    #df_prod = dict['df_prod']
     dict_tank = dict['dict_tank']
     dict_pvtmaster = dict['dict_pvtmaster']
     df_pvt_gas = dict['df_pvt_gas']
     df_pvt_oil = dict['df_pvt_oil']
-
-    dates = df_prod['datestamp']
-    ts = pd.to_numeric(dates - dates.min()) / 864e11
-    Np = df_prod['np']
-    Gp = df_prod['gp']
-    Wp = df_prod['wp']
+    dict_prod = dict['df_prod']
+    dates = dict_prod['datestamp']
+    dates = dates.to_numpy()
+    #ts = pd.to_numeric(dates - dates.min()) / 864e11
+    ts = dates - dates.min()
+    ts = [time.days for time in ts] # ts.days
+    Np = dict_prod['np']
+    Gp = dict_prod['gp']
+    Wp = dict_prod['wp']
     N = float(dict_tank['initial_inplace'])
     Swi = float(dict_tank['swi'])
     cw = float(dict_tank['cw'])
     cf = float(dict_tank['cf'])
 
     m = float(dict_tank['initial_gascap'])
-    Winj = df_prod['wi']
-    Winj = Winj.fillna(0)
-    Ginj = df_prod['gi']
-    Ginj = Ginj.fillna(0)
+    Winj = dict_prod['wi'].to_numpy()
+    #Winj = Winj.fillna(0)
+    Ginj = dict_prod['gi'].to_numpy()
+    #Ginj = Ginj.fillna(0)
     #####General PVT
     Rsi = dict_pvtmaster['gor']  # scf/stb
     try:
@@ -148,54 +191,86 @@ def mbal_setup(dict):
     interpol = lambda P: np.interp(P, pvt_gas_pressure, pvt_gas_Bg)
     pvt_oil_Bg = interpol(arr)
     aquifer_pres = [None] * len(Np)
-    return Np, Wp, Gp, N, Wei, pvt_oil_pressure, pvt_oil_Bo, pvt_oil_Bg, pvt_oil_Rs, Rsb, \
+    return dates, Np, Wp, Gp, N, Wei, pvt_oil_pressure, pvt_oil_Bo, pvt_oil_Bg, pvt_oil_Rs, Rsb, \
            Bti, Bgi, Pi, m, Boi, cw, Swi, cf, Rsi, Bw, Winj, Bwinj, Ginj, J, \
            ts, VEH_aq_type, td_array, VEH_dp_array, r, rr, aq_type
 
 
-def eval_mbal_input(dict):
-    Pres_calc = []
-    df_prod = dict['df_prod']
-    Np = df_prod['np']
-    We = [None] * len(Np)
-    aquifer_pres = [None] * len(Np)
-    dict_tank = dict['dict_tank']
-    Pi = float(dict_tank['initial_pressure'])
+def eval_mbal_input(dates, Np, Wp, Gp, N, Wei, pvt_oil_pressure, pvt_oil_Bo, pvt_oil_Bg,
+                                    pvt_oil_Rs, Rsb, Bti, Bgi, Pi, m, Boi, cw, Swi, cf, Rsi, Bw, Winj, Bwinj, Ginj, J, \
+                                    ts, VEH_aq_type, td_array, VEH_dp_array, r, rr, aq_type):
+    Pres_calc = np.array([])
+    #df_prod = dict['df_prod']
+    #Np = df_prod['np'].to_numpy()
+    We = np.array([None] * len(Np))
+    aquifer_pres = np.array([None] * len(Np))
+    #dict_tank = dict['dict_tank']
+    #Pi = float(dict_tank['initial_pressure'])
+    #Np = df_prod['np'].to_numpy()
+    #Wp = df_prod['wp'].to_numpy()
+    #Gp = df_prod['wp'].to_numpy()
+    #dates = df_prod['datestamp'].to_numpy()
+    #Winj = df_prod['wi'].to_numpy()
+    #Winj = Winj.fillna(0)
+    #Ginj = df_prod['gi'].to_numpy()
+    #Ginj = Ginj.fillna(0)
+    dict_prod = {
+        'np': Np,
+        'wp': Wp,
+        'gp': Gp,
+        'wi': Winj,
+        'gi': Ginj,
+        'datestamp': dates
+    }
+    #dict['dict_prod'] = dict_prod
 
     for x in range(len(Np)):
         if x == 0:
             aquifer_pres[x] = Pi
             We[x] = 0.0
-            Pres_calc.append(Pi)
+            Pres_calc = np.append(Pres_calc, [Pi])
+            #Pres_calc.append(Pi)
         else:
-            data = (dict, Pres_calc, We, aquifer_pres, x)
-            Pres_calc.append(pressure_calculation(data, Pres_calc)[0])
+            data = ('', Pres_calc, We, aquifer_pres, x, dates, Np, Wp, Gp, N, Wei, pvt_oil_pressure, pvt_oil_Bo, pvt_oil_Bg,
+                                    pvt_oil_Rs, Rsb, Bti, Bgi, Pi, m, Boi, cw, Swi, cf, Rsi, Bw, Winj, Bwinj, Ginj, J, \
+                                    ts, VEH_aq_type, td_array, VEH_dp_array, r, rr, aq_type)
+            Pres_calc = np.append(Pres_calc, [pressure_calculation(data, Pres_calc)[0]])
+            #Pres_calc.append(pressure_calculation(data, Pres_calc)[0])
 
-    dict['Pres_calc'] = Pres_calc
-    solution_set = drive_indices(dict)
+    #dict['Pres_calc'] = Pres_calc
+    solution_set = drive_indices(Pres_calc, dates, Np, Wp, Gp, N, Wei, pvt_oil_pressure, pvt_oil_Bo, pvt_oil_Bg, pvt_oil_Rs, Rsb, \
+           Bti, Bgi, Pi, m, Boi, cw, Swi, cf, Rsi, Bw, Winj, Bwinj, Ginj, J, \
+           ts, VEH_aq_type, td_array, VEH_dp_array, r, rr, aq_type)
     return solution_set
 
 
-def drive_indices(dict):
+def drive_indices(Pres_calc, dates, Np, Wp, Gp, N, Wei, pvt_oil_pressure, pvt_oil_Bo, pvt_oil_Bg, pvt_oil_Rs, Rsb, \
+    Bti, Bgi, Pi, m, Boi, cw, Swi, cf, Rsi, Bw, Winj, Bwinj, Ginj, J, \
+    ts, VEH_aq_type, td_array, VEH_dp_array, r, rr, aq_type):
     solution_set = pd.DataFrame()
     DDI = []
     SDI = []
     WDI = []
     CDI = []
-    Pres_calc = dict['Pres_calc']
+    #Pres_calc = dict['Pres_calc']
     Ncalc_array = []
-    df_prod = dict['df_prod']
-    Np = df_prod['np']
+    #df_prod = dict['df_prod']
+    #Np = df_prod['np']
     We = [None] * len(Np)
     aquifer_pres = [None] * len(Np)
-    Wp = df_prod['wp']
-    dict_tank = dict['dict_tank']
-    Pi = float(dict_tank['initial_pressure'])
-    N = float(dict_tank['initial_inplace'])
-    Boi = dict_tank['Boi']
-    Bgi = dict_tank['Bgi']
-    dates = df_prod['datestamp']
-    ts = pd.to_numeric(dates - dates.min()) / 864e11
+    #Wp = df_prod['wp']
+    #dict_tank = dict['dict_tank']
+    #Pi = float(dict_tank['initial_pressure'])
+    #N = float(dict_tank['initial_inplace'])
+    #Boi = dict_tank['Boi']
+    #Bgi = dict_tank['Bgi']
+    #dates = df_prod['datestamp']
+    #ts = pd.to_numeric(dates - dates.min()) / 864e11
+    ts = dates - dates.min()
+    ts = [time.days for time in ts]
+    #Np, Wp, Gp, N, Wei, pvt_oil_pressure, pvt_oil_Bo, pvt_oil_Bg, pvt_oil_Rs, Rsb, \
+    #Bti, Bgi, Pi, m, Boi, cw, Swi, cf, Rsi, Bw, Winj, Bwinj, Ginj, J, \
+    #ts, VEH_aq_type, td_array, VEH_dp_array, r, rr, aq_type = mbal_setup(dict)
 
     for x in range(len(Np)):
         if x == 0:
@@ -207,7 +282,11 @@ def drive_indices(dict):
             CDI.append(0)
             Ncalc_array.append(N)
         else:
-            F, Eo, m, Eg, Efw, We, aquifer_pres, Bw, Bti, N = mbal_inner_calc(dict, Pres_calc[x], Pres_calc, We, aquifer_pres, x)
+            F, Eo, m, Eg, Efw, We, aquifer_pres, Bw, Bti, N = mbal_inner_calc('', Pres_calc[x], Pres_calc, We, aquifer_pres, x, dates,
+                                                Np, Wp, Gp, N, Wei, pvt_oil_pressure, pvt_oil_Bo, \
+                                                pvt_oil_Bg, pvt_oil_Rs, Rsb, \
+                                                Bti, Bgi, Pi, m, Boi, cw, Swi, cf, Rsi, Bw, Winj, \
+                                                Bwinj, Ginj, J, ts, VEH_aq_type, td_array, VEH_dp_array, r, rr, aq_type)
             Ncalc = mb.oil_in_place(F, Eo, m, Eg, Efw, We[x], Bw, Bti)
             DDI.append(Ncalc * Eo / F)
             SDI.append(Ncalc * m * Eg * (Boi / Bgi) / F)
