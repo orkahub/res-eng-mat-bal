@@ -5,29 +5,31 @@ from scipy.optimize import curve_fit
 
 
 class tank():
-    prod_table = pd.DataFrame()
-    oil_pvt_table = pd.DataFrame()
-    gas_pvt_table = pd.DataFrame()
-    regress = False
-    regress_config = None
-    tank_data = {
-        'initial_inplace': None,
-        'initial_gascap': None,
-        'initial_pressure': None,
-        'wei': None,
-        'J': None,
-        'swi': None,
-        'cw': None,
-        'cf': None,
-        'Boi': None,
-        'Bgi': None
-    }
-    pvt_master = {
-        'gor': None,
-        'sat_press': None,
-        'temperature': None,
-    }
-    ts_results = pd.DataFrame()
+
+    def __init__(self):
+        self.prod_table = pd.DataFrame()
+        self.oil_pvt_table = pd.DataFrame()
+        self.gas_pvt_table = pd.DataFrame()
+        self.regress = False
+        self.regress_config = None
+        self.tank_data = {
+            'initial_inplace': None,
+            'initial_gascap': None,
+            'initial_pressure': None,
+            'wei': None,
+            'J': None,
+            'swi': None,
+            'cw': None,
+            'cf': None,
+            'Boi': None,
+            'Bgi': None
+        }
+        self.pvt_master = {
+            'gor': None,
+            'sat_press': None,
+            'temperature': None,
+        }
+        self.ts_results = pd.DataFrame()
 
     def matbal_run(self):
         #####Material Balance
@@ -48,6 +50,8 @@ class tank():
                     Pres_calc_obs.append(np.interp(ts_obs_vals[x], ts, Pres_calc2))
                 return Pres_calc_obs
 
+            BOUNDS = ([1E6, 0.00001, 0.0001], [1E9, 10E9, 10.0])
+
             df_prod = dict['df_prod']
             dates = df_prod['datestamp']
             ts = pd.to_numeric(dates - dates.min()) / 864e11
@@ -56,7 +60,7 @@ class tank():
             reservoir_pressure_obs = reservoir_pressure_obs[reservoir_pressure_obs.notnull()]
             reservoir_pressure_obs = reservoir_pressure_obs * 1.0
             popt, pcov = curve_fit(fit_mbal_input, ts_obs, reservoir_pressure_obs,
-                                   bounds=([1E6, 0.00001, 0.0001], [1E9, 10E9, 10.0]))
+                                   bounds=BOUNDS)
             sd = np.sqrt(np.diag(pcov))
             return popt, sd
 
@@ -68,10 +72,9 @@ class tank():
             'dict_tank': self.tank_data
         }
 
-        ddi = [None] * len(self.prod_table['np'])
-        sdi = [None] * len(self.prod_table['np'])
-        wdi = [None] * len(self.prod_table['np'])
-        cdi = [None] * len(self.prod_table['np'])
+        initial_container = [None] * len(self.prod_table['np'])
+        ddi = sdi = wdi = cdi = initial_container
+
         if self.regress is False:
             solution_set = itera.eval_mbal_input(data_dict)
         else:
