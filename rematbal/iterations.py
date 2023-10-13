@@ -1,7 +1,9 @@
+import rematbal.aquifer as aq
 import rematbal.matbal as mb
 import numpy as np
 from scipy.optimize import fsolve
 import pandas as pd
+
 
 def mbal_inner_calc(dict, P, Pres_calc, We, aquifer_pres, step):
     Np, Wp, Gp, N, Wei, pvt_oil_pressure, pvt_oil_Bo, pvt_oil_Bg, pvt_oil_Rs, Rsb, \
@@ -28,10 +30,10 @@ def mbal_inner_calc(dict, P, Pres_calc, We, aquifer_pres, step):
                                                                                                             Bwinj, Ginjx,
                                                                                                             Bginj, Gpx)
     if aq_type == 'VEH':
-        Wex, VEH_avg_pressure, VEH_dp_array = mb.VEH_aquifer_influx(VEH_aq_type, step, ts, td_array, VEH_dp_array,
-                                                                    r, rr, P, Pi, VEH_avg_pressure)
+        Wex, aq_pres, VEH_dp_array = aq.VEH_aquifer_influx(VEH_aq_type, step, ts, td_array, VEH_dp_array,
+                                                                    r, rr, P, Pi, aquifer_pres)
     if aq_type == 'Fetkovich':
-        Wex, aq_pres = aquifer_influx(step, P, Wei, We, ts, Pres_calc, Pi, J, aquifer_pres)
+        Wex, aq_pres = aq.fet_aquifer_influx(step, P, Wei, We, ts, Pres_calc, Pi, J, aquifer_pres)
         aquifer_pres[step] = aq_pres
     We[step] = Wex
     return F, Eo, m, Eg, Efw, We, aquifer_pres, Bw, Bti, N
@@ -55,27 +57,6 @@ def pressure_calculation(data, Pres_calc):
     x0 = Pres_calc[step - 1] - 10.0
     res = fsolve(obj_funtion2, x0, args=data)
     return res
-
-
-def aquifer_influx(step, P, Wei, We, ts, Pres_calc, Pi, J, aquifer_pres):
-    We_prev = We[step - 1]
-    ts_prev = ts[step - 1]
-    tsx = ts[step]
-    avg_pres = (Pres_calc[step - 1] + P) / 2
-    aq_pres = aquifer_pressure(step, Wei, We, aquifer_pres, Pi)
-    # print(step,aq_pres)
-    Wex = (Wei / Pi) * (aq_pres - avg_pres) * (1 - np.exp(-J * Pi * (tsx - ts_prev) / Wei))
-    Wex = We_prev + Wex
-    return Wex, aq_pres
-
-
-def aquifer_pressure(step, Wei, We, aquifer_pres, Pi):
-    We_prev = We[step - 1]
-    if step == 1:
-        aq_pres = Pi
-    else:
-        aq_pres = Pi * (1 - We_prev / (Wei))
-    return aq_pres
 
 
 def mbal_setup(dict):
@@ -120,8 +101,8 @@ def mbal_setup(dict):
         VEH_aq_type = dict_tank['VEH_aq_type']
         r = dict_tank['r']
         rr = dict_tank['rr']
-        td_array = mb.VEH_td(VEH_aq_type, dict_tank['k'], ts, dict_tank['poro'], dict_tank['visc'], dict_tank['ct'], rr,
-                          dict_tank['La'])
+        td_array = aq.VEH_td(VEH_aq_type, dict_tank['k'], ts, dict_tank['poro'], dict_tank['visc'], dict_tank['ct'], rr,
+                                           dict_tank['La'])
     else:
         Wei = float(dict_tank['wei'])
         J = float(dict_tank['J'])

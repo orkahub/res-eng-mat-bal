@@ -3,7 +3,7 @@ import numpy as np
 import os
 import pandas as pd
 import datetime
-import rematbal.main as main
+import rematbal.tank as main
 
 
 def test_calculated_pressure_at_different_timesteps():
@@ -73,3 +73,6 @@ def test_calculated_pressure_at_different_timesteps():
 
 def test_if_plots_are_ploted():
     pass
+
+if __name__ == "__main__":
+    test_calculated_pressure_at_different_timesteps()

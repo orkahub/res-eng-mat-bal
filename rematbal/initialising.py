@@ -1,4 +1,6 @@
 import numpy as np
+
+import rematbal.aquifer
 import rematbal.matbal as mb
 import pandas as pd
 import rematbal.iterations as itera
@@ -61,8 +63,8 @@ def eval_mbal_input2(dict):
         VEH_aq_type = dict_tank['VEH_aq_type']
         r = dict_tank['r']
         rr = dict_tank['rr']
-        td_array = mb.VEH_td(VEH_aq_type, dict_tank['k'], ts, dict_tank['poro'], dict_tank['visc'], dict_tank['ct'], rr,
-                          dict_tank['La'])
+        td_array = rematbal.aquifer.VEH_td(VEH_aq_type, dict_tank['k'], ts, dict_tank['poro'], dict_tank['visc'], dict_tank['ct'], rr,
+                                           dict_tank['La'])
     else:
         Wei = float(dict_tank['wei'])
         J = float(dict_tank['J'])

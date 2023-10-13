@@ -8,7 +8,7 @@ import datetime
 import rematbal.plots as plots
 from plotly.subplots import make_subplots
 from plotly.offline import plot
-from rematbal.main import tank as tank_instance
+from rematbal.tank import tank as tank_instance
 
 
 regress = False

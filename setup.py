@@ -1,20 +1,22 @@
 from distutils.core import setup
 setup(
-  name = 'rematbal',
-  packages = ['rematbal'],
-  version = '0.2',
+  name='rematbal',
+  packages=['rematbal'],
+  version='2.1',
   license='MIT',
-  description = 'Reservoir Engineering Material Balance library',
-  author = 'Orkahub Energy',
-  author_email = 'orkahub@gmail.com',
-  url = 'https://github.com/orkahub/res-eng-mat-bal',
-  download_url = 'https://github.com/orkahub/res-eng-mat-bal/archive/v_02.tar.gz',
-  keywords = ['RESERVOIR', 'ENERGY', 'OIL', 'GAS'],
+  description='Reservoir Engineering Material Balance library',
+  author='Orkahub Energy',
+  author_email='orkahub@gmail.com',
+  url='https://github.com/orkahub/res-eng-mat-bal',
+  download_url='https://github.com/orkahub/res-eng-mat-bal/archive/v2_1.tar.gz',
+  keywords=['RESERVOIR', 'ENERGY', 'OIL', 'GAS'],
   install_requires=[
           'pandas',
           'numpy',
           'scipy',
           'plotly',
+          'pvtpy',
+          'krpy'
       ],
   classifiers=[
     'Development Status :: 3 - Alpha',
